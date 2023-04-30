@@ -67,22 +67,24 @@ class BaselineNLPFlow(FlowSpec):
         ## Simplest possible baseline is a naive classifier. This will predict the most common class (it ignores the features).
         from sklearn.dummy import DummyClassifier
         
-        dummy_clf = DummyClassifier(strategy="most_frequent")
+        dummy_clf = DummyClassifier(strategy="uniform")
         X_train, y_train = self.traindf['review'], self.traindf['label']
         X_val, y_val = self.valdf['review'], self.valdf['label']
         dummy_clf.fit(X_train, y_train)
 
         preds = dummy_clf.predict(X_val)
+        scores = dummy_clf.predict_proba(X_val)
         
         del X_train
         del X_val
         del y_train
 
         self.base_acc = acc(y_val, preds)
-        self.base_rocauc = rocauc(y_val, preds)
+        self.base_rocauc = rocauc(y_val, scores[:,1])
 
         del y_val
         del preds
+        del scores
 
         self.baseline_model = dummy_clf
 
